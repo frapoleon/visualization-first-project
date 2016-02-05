@@ -12,7 +12,7 @@ output: html_document
 # < Feb 11th >
 #
 #############################
-setwd("~/Documents/Study/Spring 2016/EDAV")
+#setwd("~/Documents/Study/Spring 2016/EDAV")
 
 library(xlsx)
 library(reshape)
@@ -92,12 +92,14 @@ barplot(table(data$waitlist))
 barplot(table(data$exp.R.manipulation))
 barplot(table(data$exp.R.advanced, data$program))
 
-barplot(sort(sapply(data[11:30], sum), decreasing=TRUE))
+
+barplot(sort(sapply(data[11:30], sum), decreasing=FALSE), horiz=TRUE)
 
 # Correlation plot
 library(ellipse)
 ctab <- cor(data[, 11:30])
 distance <- as.dist(1 - ctab)
+# http://datascienceplus.com/hierarchical-clustering-in-r/
 plot(hclust(distance), 
      main="Dissimilarity = 1 - Correlation", xlab="")
 ordering <- hclust(distance)$labels[hclust(distance)$order]
