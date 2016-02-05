@@ -90,6 +90,9 @@ for (exp.col in experience.cols) {
 
 barplot(table(data$waitlist))
 barplot(table(data$exp.R.manipulation))
+barplot(table(data$exp.R.advanced, data$program))
+
+barplot(sort(sapply(data[11:30], sum), decreasing=TRUE))
 
 # Correlation plot
 library(ellipse)
@@ -103,7 +106,8 @@ round(ctab, 2)
 colorfun <- colorRamp(c("#CC0000","white","#3366CC"), space="Lab")
 plotcorr(ctab[ordering,ordering], col=rgb(colorfun((ctab[ordering,ordering]+1)/2), maxColorValue=255),
          mar = c(0.1, 0.1, 0.1, 0.1))
-n <- nrow(ctab)
+
+
 
 ```
 
