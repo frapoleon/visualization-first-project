@@ -19,7 +19,7 @@ library(reshape)
 
 
 # Read xlsx file
-raw.data <- read.xlsx("Survey+Response.xlsx", sheetName = "Form Responses 1")
+raw.data <- read.xlsx("../docs/Survey_Response.xlsx", sheetName = "Form Responses 1")
 data <- raw.data
 
 
@@ -32,21 +32,28 @@ cleaned.names <- c('waitlist', 'program','tools','exp.R.manipulation',
           'gender','text.editor','exp.R.graphics','exp.R.advanced','exp.R.reproducible','exp.Matlab','exp.Github')
 names(data) <- cleaned.names
 
-
+library(stringr)
 # Split tools column into multiple columns
 ## Count the maximum number of commas per row in the tools column
 num.commas <- max(sapply(gregexpr(",", data$tools, fixed = TRUE), function(x) max(length(x)))) + 1
 ## Split the tools column in separate columns
 tool.cols <- colsplit(data$tools,"[,]",names=sapply(1:num.commas, function(x) paste('tools', x, sep='')))
+tool.cols <- sapply(tool.cols, str_trim)
+unique.tool.values <- unique(unlist(lapply(tool.cols, FUN=unique)))
+
 tool.matrix <- matrix(0, nrow = nrow(tool.cols),20)
-tool.names <- c("Matlab", "R", "Github", "Excel", "SQL", "RStudio", "ggplot2", "shell", "C", "Python", "LaTeX", "reg_exp", "Sweave", "XML", "Web", "dropbox", "gdocs","Stata", "SPSS", "lattice")
-colnames(tool.matrix) = tool.names
+
+tool.names <- unique.tool.values
+colnames(tool.matrix) <- tool.names
 tool.matrix <- as.data.frame(tool.matrix)
 for (i in 1:ncol(tool.cols) ) {
       for (tool.name in tool.names) {
-          tool.matrix[which(tool.cols[i] == tool.name), tool.name] <- 1
+          tool.matrix[which(tool.cols[, i] == tool.name), tool.name] <- 1
           }
 }
+
+clean.tool.names <- c("R", "Excel", "Matlab", "RStudio", "Github", "SQL", "Shell", "Python", "SPSS", "ggplot2", "GDrive", "Web", "C", "Dropbox", "Regex", "Stata", "LaTeX", "Sweave", "XML", "Lattice")
+names(tool.matrix) <- clean.tool.names
 data <- cbind(data, tool.matrix)
 data <- subset(data, select=-c(tools))
 
@@ -83,5 +90,20 @@ for (exp.col in experience.cols) {
 
 barplot(table(data$waitlist))
 barplot(table(data$exp.R.manipulation))
+
+# Correlation plot
+library(ellipse)
+ctab <- cor(data[, 11:30])
+distance <- as.dist(1 - ctab)
+plot(hclust(distance), 
+     main="Dissimilarity = 1 - Correlation", xlab="")
+ordering <- hclust(distance)$labels[hclust(distance)$order]
+
+round(ctab, 2)
+colorfun <- colorRamp(c("#CC0000","white","#3366CC"), space="Lab")
+plotcorr(ctab[ordering,ordering], col=rgb(colorfun((ctab[ordering,ordering]+1)/2), maxColorValue=255),
+         mar = c(0.1, 0.1, 0.1, 0.1))
+n <- nrow(ctab)
+
 ```
 
