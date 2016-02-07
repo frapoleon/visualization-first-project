@@ -64,11 +64,14 @@ sort(table(data$program))
 levels(data$program)[levels(data$program)=="Ms in ds"] <- "IDSE (master)"
 levels(data$program)[levels(data$program)=="MSDS"] <- "IDSE (master)"
 levels(data$program)[levels(data$program)=="PhD Biomedical Informatics"] <- "Ph.D."
+levels(data$program)[levels(data$program)=="Data Science"] <- "Unknown"
 
 
 # Clean up text editor values
 levels(data$text.editor)
 sort(table(data$text.editor))
+# Remove extra spaces
+data$text.editor <- factor(str_trim(data$text.editor))
 
 levels(data$text.editor)[levels(data$text.editor)=="textwrangler"] <- "TextWrangler"
 levels(data$text.editor)[levels(data$text.editor)=="Text Wrangler"] <- "TextWrangler"
@@ -81,6 +84,17 @@ levels(data$text.editor)[levels(data$text.editor)=="Sublime Text!"] <- "Sublime 
 levels(data$text.editor)[levels(data$text.editor)=="sublime text 2"] <- "Sublime Text"
 levels(data$text.editor)[levels(data$text.editor)=="Sublime 2"] <- "Sublime Text"
 levels(data$text.editor)[levels(data$text.editor)=="sublime text"] <- "Sublime Text"
+
+levels(data$text.editor)[levels(data$text.editor)=="I used jupyter last semester"] <- "Jupyter"
+# Ipython is now known as Jupyter
+levels(data$text.editor)[levels(data$text.editor)=="Ipython"] <- "Jupyter"
+
+levels(data$text.editor)[levels(data$text.editor)=="haven't used any"] <- "None"
+
+
+
+
+
 
 # Assign level ordering to experience variables
 experience.cols <- names(data)[grepl("^exp.", names(data))]
