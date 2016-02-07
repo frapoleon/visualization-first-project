@@ -1,0 +1,115 @@
+---
+title: "EDAV Project 1"
+output: html_document
+---
+
+```{r}
+#############################
+# < Waitlist Survivors >
+#
+# STAT W4701 
+# Homework < 01 >
+# < Feb 11th >
+#
+#############################
+#setwd("~/Documents/Study/Spring 2016/EDAV")
+
+library(xlsx)
+library(reshape)
+
+
+# Read xlsx file
+raw.data <- read.xlsx("../docs/Survey_Response.xlsx", sheetName = "Form Responses 1")
+data <- raw.data
+
+
+# drop empty columns
+data <- data[, colSums(is.na(data)) < nrow(data)]
+
+
+# Clean up variable names
+cleaned.names <- c('waitlist', 'program','tools','exp.R.manipulation',
+          'gender','text.editor','exp.R.graphics','exp.R.advanced','exp.R.reproducible','exp.Matlab','exp.Github')
+names(data) <- cleaned.names
+
+library(stringr)
+# Split tools column into multiple columns
+## Count the maximum number of commas per row in the tools column
+num.commas <- max(sapply(gregexpr(",", data$tools, fixed = TRUE), function(x) max(length(x)))) + 1
+## Split the tools column in separate columns
+tool.cols <- colsplit(data$tools,"[,]",names=sapply(1:num.commas, function(x) paste('tools', x, sep='')))
+tool.cols <- sapply(tool.cols, str_trim)
+unique.tool.values <- unique(unlist(lapply(tool.cols, FUN=unique)))
+
+tool.matrix <- matrix(0, nrow = nrow(tool.cols),20)
+
+tool.names <- unique.tool.values
+colnames(tool.matrix) <- tool.names
+tool.matrix <- as.data.frame(tool.matrix)
+for (i in 1:ncol(tool.cols) ) {
+      for (tool.name in tool.names) {
+          tool.matrix[which(tool.cols[, i] == tool.name), tool.name] <- 1
+          }
+}
+
+clean.tool.names <- c("R", "Excel", "Matlab", "RStudio", "Github", "SQL", "Shell", "Python", "SPSS", "ggplot2", "GDrive", "Web", "C", "Dropbox", "Regex", "Stata", "LaTeX", "Sweave", "XML", "Lattice")
+names(tool.matrix) <- clean.tool.names
+data <- cbind(data, tool.matrix)
+data <- subset(data, select=-c(tools))
+
+
+# Clean up inconsistent program values
+levels(data$program)
+sort(table(data$program))
+levels(data$program)[levels(data$program)=="Ms in ds"] <- "IDSE (master)"
+levels(data$program)[levels(data$program)=="MSDS"] <- "IDSE (master)"
+levels(data$program)[levels(data$program)=="PhD Biomedical Informatics"] <- "Ph.D."
+
+
+# Clean up text editor values
+levels(data$text.editor)
+sort(table(data$text.editor))
+
+levels(data$text.editor)[levels(data$text.editor)=="textwrangler"] <- "TextWrangler"
+levels(data$text.editor)[levels(data$text.editor)=="Text Wrangler"] <- "TextWrangler"
+levels(data$text.editor)[levels(data$text.editor)=="textWrangler"] <- "TextWrangler"
+
+levels(data$text.editor)[levels(data$text.editor)=="Sublime"] <- "Sublime Text"
+levels(data$text.editor)[levels(data$text.editor)=="Sublime Text 2"] <- "Sublime Text"
+levels(data$text.editor)[levels(data$text.editor)=="sublime"] <- "Sublime Text"
+levels(data$text.editor)[levels(data$text.editor)=="Sublime Text!"] <- "Sublime Text"
+levels(data$text.editor)[levels(data$text.editor)=="sublime text 2"] <- "Sublime Text"
+levels(data$text.editor)[levels(data$text.editor)=="Sublime 2"] <- "Sublime Text"
+levels(data$text.editor)[levels(data$text.editor)=="sublime text"] <- "Sublime Text"
+
+# Assign level ordering to experience variables
+experience.cols <- names(data)[grepl("^exp.", names(data))]
+for (exp.col in experience.cols) {
+  data[, exp.col] <- factor(data[, exp.col], levels=levels(data[, exp.col])[c(4, 1, 2, 3)], ordered=TRUE)
+}
+
+barplot(table(data$waitlist))
+barplot(table(data$exp.R.manipulation))
+barplot(table(data$exp.R.advanced, data$program))
+
+
+barplot(sort(sapply(data[11:30], sum), decreasing=FALSE), horiz=TRUE)
+
+# Correlation plot
+library(ellipse)
+ctab <- cor(data[, 11:30])
+distance <- as.dist(1 - ctab)
+# http://datascienceplus.com/hierarchical-clustering-in-r/
+plot(hclust(distance), 
+     main="Dissimilarity = 1 - Correlation", xlab="")
+ordering <- hclust(distance)$labels[hclust(distance)$order]
+
+round(ctab, 2)
+colorfun <- colorRamp(c("#CC0000","white","#3366CC"), space="Lab")
+plotcorr(ctab[ordering,ordering], col=rgb(colorfun((ctab[ordering,ordering]+1)/2), maxColorValue=255),
+         mar = c(0.1, 0.1, 0.1, 0.1))
+
+
+
+```
+
