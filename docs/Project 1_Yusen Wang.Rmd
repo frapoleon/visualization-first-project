@@ -4,218 +4,130 @@ output: html_document
 ---
 
 ```{r}
-#############################
-# < Waitlist Survivors >
-#
-# STAT W4701 
-# Homework < 01 >
-# < Feb 11th >
-#
-#############################
-setwd("~/Downloads")
 library(xlsx)
-library(dplyr)
-data <- read.xlsx("Survey+Response.xlsx", sheetIndex = 1)
+library(reshape)
+#setwd("C:/Users/SONY/Desktop/Data Visualization")
+setwd("~/Downloads")
+raw.data <- read.xlsx("Survey+Response.xlsx", sheetName = "Form Responses 1")
+data <- raw.data
+
 
 # drop empty columns
-data <- data[,-5:-11]
-data <- data[,-12:-31]
+data <- data[, colSums(is.na(data)) < nrow(data)]
 
-# function---experence_level
-exp_level <- function(x,data){
-  expl <- matrix(0,nrow(data),1)
-  for (i in 1:nrow(data)){
-   if (identical(as.character(x[i]),"A little")) {
-      expl[i]=1
-    } else if (identical(as.character(x[i]),"Confident")){
-      expl[i]=2
-    } else if (identical(as.character(x[i]),"Expert")){
-      expl[i]=3
-    } 
-  }
-  return(expl)
-}
-# Seperate tools
-library(reshape)
-data_1 <- cbind(data,colsplit(data$Experiences.with.tools,"[,]",names=c("tool1","tool2","tool3","tool4","tool5","tool6","tool7","tool8","tool9","tool10","tool11","tool12","tool13","tool14","tool15","tool16")))
 
-tool_matrix <- matrix(0,nrow = nrow(data_1),20)
-colnames(tool_matrix) = c("Matlab", "R", "Github", "Excel", "SQL", "RStudio", "ggplot2", "shell", "C", "Python", "LaTeX", "reg_exp", "Sweave", "XML", "Web", "dropbox", "google","Stata", "SPSS", "lattice")
-tool_matrix <- as.data.frame(tool_matrix)
+# Clean up variable names
+cleaned.names <- c('waitlist', 'program','tools','exp.R.manipulation',
+                   'gender','text.editor','exp.R.graphics','exp.R.advanced','exp.R.reproducible','exp.Matlab','exp.Github')
+names(data) <- cleaned.names
 
-for (i in 1:nrow(data_1)){
-  index <- which(colnames(data_1)=="tool1")
-  while (index < ncol(data_1) ){
-    visited <- 0
-    while(visited < 1 ){
-      if (identical(as.character(data_1[i,index]),"Matlab")|identical(as.character(data_1[i,index])," Matlab")){
-        tool_matrix$Matlab[i] = 1
-        visited <- 1
-      } else if (identical(as.character(data_1[i,index]),"R")|identical(as.character(data_1[i,index])," R")){
-        tool_matrix$R[i] = 1
-        visited <- 1
-      } else if (identical(as.character(data_1[i,index]),"Github")|identical(as.character(data_1[i,index])," Github")){
-        tool_matrix$Github[i] = 1
-        visited <- 1
-      } else if (identical(as.character(data_1[i,index]),"Excel")|identical(as.character(data_1[i,index])," Excel")){
-        tool_matrix$Excel[i] = 1
-        visited <- 1
-      } else if (identical(as.character(data_1[i,index]),"SQL")|identical(as.character(data_1[i,index])," SQL")){
-        tool_matrix$SQL[i] = 1
-        visited <- 1
-      } else if (identical(as.character(data_1[i,index]),"RStudio")|identical(as.character(data_1[i,index])," RStudio")){
-        tool_matrix$RStudio[i] = 1
-        visited <- 1
-      } else if (identical(as.character(data_1[i,index]),"ggplot2")|identical(as.character(data_1[i,index])," ggplot2")){
-        tool_matrix$ggplot2[i] = 1
-        visited <- 1
-      } else if (identical(as.character(data_1[i,index]),"shell (terminal / command line)")|identical(as.character(data_1[i,index])," shell (terminal / command line)")){
-        tool_matrix$shell[i] = 1
-        visited <- 1
-      } else if (identical(as.character(data_1[i,index]),"C/C++")|identical(as.character(data_1[i,index])," C/C++")){
-        tool_matrix$C[i] = 1
-        visited <- 1
-      } else if (identical(as.character(data_1[i,index]),"Python")|identical(as.character(data_1[i,index])," Python")){
-        tool_matrix$Python[i] = 1
-        visited <- 1
-      } else if (identical(as.character(data_1[i,index]),"LaTeX")|identical(as.character(data_1[i,index])," LaTeX")){
-        tool_matrix$LaTeX[i] = 1
-        visited <- 1
-      } else if (identical(as.character(data_1[i,index]), "regular expressions (grep)")|identical(as.character(data_1[i,index]), " regular expressions (grep)")){
-        tool_matrix$reg_exp[i] = 1
-        visited <- 1
-      } else if (identical(as.character(data_1[i,index]), "Sweave/knitr")|identical(as.character(data_1[i,index]), " Sweave/knitr")){
-        tool_matrix$Sweave[i] = 1
-        visited <- 1
-      } else if (identical(as.character(data_1[i,index]), "XML")|identical(as.character(data_1[i,index]), " XML")){
-        tool_matrix$XML[i] = 1
-        visited <- 1
-      } else if (identical(as.character(data_1[i,index]), "Web: html css js")|identical(as.character(data_1[i,index]), " Web: html css js")){
-        tool_matrix$Web[i] = 1
-        visited <- 1
-      } else if (identical(as.character(data_1[i,index]),"dropbox")|identical(as.character(data_1[i,index])," dropbox")){
-        tool_matrix$dropbox[i] = 1
-        visited <- 1
-      } else if (identical(as.character(data_1[i,index]), "google drive (formerly docs)")|identical(as.character(data_1[i,index]), " google drive (formerly docs)")){
-        tool_matrix$google[i] = 1
-        visited <- 1
-      } else if (identical(as.character(data_1[i,index]), "Stata")|identical(as.character(data_1[i,index]), " Stata")){
-        tool_matrix$Stata[i] = 1
-        visited <- 1
-      } else if (identical(as.character(data_1[i,index]), "SPSS")|identical(as.character(data_1[i,index]), " SPSS")){
-        tool_matrix$SPSS[i] = 1
-        visited <- 1
-      } else if (identical(as.character(data_1[i,index]), "lattice")|identical(as.character(data_1[i,index]), " lattice")){
-        tool_matrix$lattice[i] = 1
-        visited <- 1
-      } 
-    }
-    index <- index + 1
+
+```
+
+```{r}
+# Split tools column into multiple columns
+## Count the maximum number of commas per row in the tools column
+num.commas <- max(sapply(gregexpr(",", data$tools, fixed = TRUE), function(x) max(length(x)))) + 1
+## Split the tools column in separate columns
+tool.cols <- colsplit(data$tools,"[,]",names=sapply(1:num.commas, function(x) paste('tools', x, sep='')))
+tool.matrix <- matrix(0, nrow = nrow(tool.cols),20)
+tool.names <- c("Matlab", "R", "Github", "Excel", "SQL", "RStudio", "ggplot2", "shell", "C", "Python", "LaTeX", "reg_exp", "Sweave", "XML", "Web", "dropbox", "gdocs","Stata", "SPSS", "lattice")
+colnames(tool.matrix) = tool.names
+tool.matrix <- as.data.frame(tool.matrix)
+```
+
+```{r}
+
+for (i in 1:ncol(tool.cols) ) {
+  for (tool.name in tool.names) {
+    tool.matrix[which(tool.cols[i] == tool.name), tool.name] <- 1
   }
 }
 
-data_1 <- cbind(data_1,tool_matrix)
 
-# Waitlist
-waitlist <- matrix(0,nrow=nrow(data_1),1)
-for (i in 1:nrow(data)){
-  if (identical(as.character(data$Are.you.on.the.waiting.list.[i]),"Yes")) {
-    waitlist[i]=1
-  }
-}
-data_2 <- cbind(waitlist,data_1)
+```
 
-# Program
-# untouched
+```{r}
+data <- cbind(data, tool.matrix)
+data <- subset(data, select=-c(tools))
 
-# Programming and Analytical Experience (R, data manipulation, modeling) 
-exp_r <- exp_level(data_2$Programming.and.Analytical.Experiences..R..data.manipulation.and.modeling.,data_2)
-data_3 <- cbind(data_2,exp_r)
 
-# Gender
-gender <- matrix(0,nrow=nrow(data_3),1)
-for (i in 1:nrow(data_3)){
-  if (identical(as.character(data_3$What.is.your.preferred.gender.pronoun.)[i],"she/her")) {
-    gender[i]=1
-  }
-}
-data_4 <- cbind(data_3,gender)
 
-# Most used code txt
-# untouched
+```
 
-# Programming and Analytical Experiences [R, graphic basics (base, lattice, grid etc. )]
-exp_g <- exp_level(data_4$Programming.and.Analytical.Experiences..R..graphic.basics..base..lattice..grid.etc....,data_4)
-data_5 <- cbind(data_4,exp_g)
+```{r}
+# Clean up inconsistent program values
+levels(data$program)
+sort(table(data$program))
+levels(data$program)[levels(data$program)=="Ms in ds"] <- "IDSE (master)"
+levels(data$program)[levels(data$program)=="MSDS"] <- "IDSE (master)"
+levels(data$program)[levels(data$program)=="PhD Biomedical Informatics"] <- "Ph.D."
 
-# Programming and Analytical Experiences [R, advanced (multivariate data analysis, e.g. spatiotemporal 
-exp_a <- exp_level(data_5$Programming.and.Analytical.Experiences..R..advanced..multivariate.data.analysis..e.g..spatiotemporal.data..visualization.and.modeling..,data_5)
-data_6 <-cbind(data_5,exp_a)
 
-# Programming and Analytical Experiences [Reproducible documentation with R (e.g. R Markdown)]
-exp_rm <- exp_level(data_6$Programming.and.Analytical.Experiences..Reproducible.documentation.with.R..e.g..R.Markdown..,data_6)
-data_7 <-cbind(data_5,exp_rm)
+# Clean up text editor values
+levels(data$text.editor)
+sort(table(data$text.editor))
 
-# Programming and Analytical Experiences [Matlab, data manipulation, analysis, visualization and 
-exp_m <- exp_level(data_7$Programming.and.Analytical.Experiences..Matlab..data.manipulation..analysis..visualization.and.modeling.,data_7)
-data_8 <- cbind(data_6,exp_m)
+levels(data$text.editor)[levels(data$text.editor)=="textwrangler"] <- "TextWrangler"
+levels(data$text.editor)[levels(data$text.editor)=="Text Wrangler"] <- "TextWrangler"
+levels(data$text.editor)[levels(data$text.editor)=="textWrangler"] <- "TextWrangler"
 
-# Programming and Analytical Experiences [Github]
-exp_gh <- exp_level(data_8$Programming.and.Analytical.Experiences..Github.,data_8)
-data_9 <- cbind(data_8,exp_gh)
-
-# Choose variables that we are going to use, and delete unused variables.
-data_used <- data_9[ , c(1, 3, 13:54)]
-rm(data_1, data_2, data_3, data_4, data_5, data_6, data_7, data_8, data_9, exp_gh, exp_m, exp_rm, exp_a, exp_g, exp_r, gender, waitlist, tool_matrix)
-# preparation is done.
+levels(data$text.editor)[levels(data$text.editor)=="Sublime"] <- "Sublime Text"
+levels(data$text.editor)[levels(data$text.editor)=="Sublime Text 2"] <- "Sublime Text"
+levels(data$text.editor)[levels(data$text.editor)=="sublime"] <- "Sublime Text"
+levels(data$text.editor)[levels(data$text.editor)=="Sublime Text!"] <- "Sublime Text"
+levels(data$text.editor)[levels(data$text.editor)=="sublime text 2"] <- "Sublime Text"
+levels(data$text.editor)[levels(data$text.editor)=="Sublime 2"] <- "Sublime Text"
+levels(data$text.editor)[levels(data$text.editor)=="sublime text"] <- "Sublime Text"
 ```
 
 ```{r}
 # look enrollment condition by gender.
-by_gender <- data_used$gender
-by_gender <- ifelse(by_gender == 1, "female", "male")
+by_gender <- as.data.frame(as.character(data$gender[which(data$gender != "doesn't matter")]))
+colnames(by_gender) <- "gender"
+
 barplot(table(by_gender), xlab = "Gender", ylab = "Total number", main = "Enrollment by gender")
 
-# find out top 9 code editor tools used most.
-by_preferred_tool <- table(data$What.code.text.editor.do.you.use.most.)
-by_preferred_tool <- sort(by_preferred_tool, decreasing = TRUE)[1:9]
-barplot(by_preferred_tool, las = 3, cex.names = 0.74, ylab = "Total number", main = "top 9 code editor tools used most")
+# find out top 7 code editor tools used most.
+by_preferred_tool <- table(data$text.editor)
+by_preferred_tool <- sort(by_preferred_tool, decreasing = TRUE)[1:7]
+barplot(by_preferred_tool, las = 3, cex.names = 0.74, ylab = "Total number", main = "top 7 code editor tools used most")
 
 opar <- par()
 par(mfrow = c(2,3))
-# Experience with R basics.
-r_basics <- table(data[ , 4])
-barplot(r_basics, las = 3, cex.names = 0.9, ylab = "Total number", main = "Experience with R basics")
+# Experience with R manipulation.
+r_manipulation <- table(data[ , 3])
+barplot(r_manipulation, las = 3, cex.names = 0.9, ylab = "Total number", main = "Experience with R manipulation")
 
 # Experience with R graphics. 
-r_graphics <- table(data[ , 7])
+r_graphics <- table(data[ , 6])
 barplot(r_graphics, las = 3, cex.names = 0.9, ylab = "Total number", main = "Experience with R graphics")
 
 # Experience with R advanced.
-r_advanced <- table(data[ , 8])
+r_advanced <- table(data[ , 7])
 barplot(r_advanced, las = 3, cex.names = 0.9, ylab = "Total number", main = "Experience with R advanced")
 
-# Experience with R Markdown.
-r_markdown <- table(data[ , 9])
-barplot(r_markdown, las = 3, cex.names = 0.9, ylab = "Total number", main = "Experience with R Markdown")
+# Experience with R reproducible.
+r_reproducible <- table(data[ , 8])
+barplot(r_reproducible, las = 3, cex.names = 0.9, ylab = "Total number", main = "Experience with R reproducible")
 
 # Experience Matlab.
-matlab <- table(data[ , 10])
+matlab <- table(data[ , 9])
 barplot(matlab, las = 3, cex.names = 0.9, ylab = "Total number", main = "Experience with Matlab")
 
 # Experience with Github.
-github <- table(data[ , 11])
+github <- table(data[ , 10])
 barplot(github, las = 3, cex.names = 0.9, ylab = "Total number", main = "Experience with Github")
 
 par(opar)
 
-# Total numer of use with all tools.
-barplot(sort(colSums(data_used[, 19:38]), decreasing = TRUE), las = 3, cex.names = 0.9, ylab = "Total number", main = "Experience with all tools")
-
 # Programming and Analytical Experiences with All Tools.
 library(vcd)
-exp_tool <- apply(data[ , c(4, 7:11)], 2, FUN = table)
-colnames(exp_tool) <- c("r_basics", "r_graphics", "r_advanced", "RMarkdown", "Matlab", "Github")
+exp_tool <- apply(data[ , c(3, 6:10)], 2, FUN = table)
+colnames(exp_tool) <- c("r_manipulation", "r_graphics", "r_advanced", "r_reproducible", "Matlab", "Github")
 spine(t(exp_tool), main = "Programming and Analytical Experiences with All Tools")
+
+# Total numer of use with all tools.
+barplot(sort(colSums(data[, 11:30]), decreasing = TRUE), las = 3, cex.names = 0.9, ylab = "Total number", main = "Experience with all tools")
 ```
 
