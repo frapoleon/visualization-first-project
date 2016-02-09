@@ -123,7 +123,39 @@ colorfun <- colorRamp(c("#CC0000","white","#3366CC"), space="Lab")
 plotcorr(ctab[ordering,ordering], col=rgb(colorfun((ctab[ordering,ordering]+1)/2), maxColorValue=255),
          mar = c(0.1, 0.1, 0.1, 0.1))
 
+```
 
+```{r results="asis"}
+library(devtools)
+library(Rcpp)
+require('httr')
+require(rCharts)
+require(rjson)
+
+#Sankey Graph
+data_t=as.data.frame(table(data$program,data$text.editor))
+#remove all data with 0 relations
+data_t=data_t[data_t[,3]>0,]
+colnames(data_t) <- c("source", "target", "value")
+sankeyPlot <- rCharts$new()
+sankeyPlot$setTemplate(script = "./rCharts_d3_sankey-gh-pages/layouts/chart.html")
+sankeyPlot$setLib('http://timelyportfolio.github.io/rCharts_d3_sankey/libraries/widgets/d3_sankey')
+sankeyPlot$set(
+  data = data_t,
+  nodeWidth = 15,
+  nodePadding = 10,
+  layout = 32,
+  width = 800,
+  height = 500,
+  units = "TWh",
+  title = "Editor-Program"
+)
+#sankeyPlot$publish("Sankey by Tool")
+save_stdout <- function(x){
+  paste(capture.output(x), collapse = '\n')
+}
+#save_stdout(sankeyPlot$show('inline', include_assets = TRUE, standalone = TRUE))
+sankeyPlot$print('iframesrc',  include_assets=TRUE)
 
 ```
 
