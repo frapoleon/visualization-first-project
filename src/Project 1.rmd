@@ -138,7 +138,7 @@ library(Rcpp)
 require('httr')
 require(rCharts)
 require(rjson)
-
+# Donut with Programs
 p5 <- rCharts$new()
 p5 <- nPlot(~program, data = data, type = 'pieChart')
 p5$chart(donut = TRUE)
@@ -188,4 +188,7 @@ colnames(data.boxplot)=c("tool","experience")
 n2<-rCharts$new()
 n2 = nPlot( ~experience,group="tool", data = data.boxplot, type = "multiBarChart")
 n2$print('inline',  include_assets=TRUE)
+
+
+
 ```

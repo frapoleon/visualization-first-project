@@ -325,7 +325,8 @@ library(devtools)</code></pre>
 <pre><code>## Loading required package: rCharts</code></pre>
 <pre class="r"><code>require(rjson)</code></pre>
 <pre><code>## Loading required package: rjson</code></pre>
-<pre class="r"><code>p5 &lt;- rCharts$new()
+<pre class="r"><code># Donut with Programs
+p5 &lt;- rCharts$new()
 p5 &lt;- nPlot(~program, data = data, type = 'pieChart')
 p5$chart(donut = TRUE)
 p5$print('iframe',  include_assets=TRUE)</code></pre>
