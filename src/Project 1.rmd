@@ -125,7 +125,7 @@ plotcorr(ctab[ordering,ordering], col=rgb(colorfun((ctab[ordering,ordering]+1)/2
 
 ```
 
-```{r results="asis"}
+```{r results="asis" }
 #install.packages("rjson")
 #install.packages("rCharts")
 #install.packages("devtools")
@@ -138,6 +138,11 @@ library(Rcpp)
 require('httr')
 require(rCharts)
 require(rjson)
+
+p5 <- rCharts$new()
+p5 <- nPlot(~program, data = data, type = 'pieChart')
+p5$chart(donut = TRUE)
+p5$print('iframe',  include_assets=TRUE)
 
 #Sankey Graph
 data_t=as.data.frame(table(data$program,data$text.editor))
@@ -162,11 +167,13 @@ save_stdout <- function(x){
   paste(capture.output(x), collapse = '\n')
 }
 #save_stdout(sankeyPlot$show('inline', include_assets = TRUE, standalone = TRUE))
-sankeyPlot$print('iframe',  include_assets=TRUE)
+sankeyPlot$print('iframesrc',  include_assets=TRUE)
 
 ```
 
-``````{r results="asis"}
+``````{r results="asis" }
+
+
 
 col.names.data=c("exp.R.advanced","exp.Github","exp.R.reproducible"
                  ,"exp.R.manipulation","exp.R.graphics","exp.Matlab")
@@ -181,6 +188,4 @@ colnames(data.boxplot)=c("tool","experience")
 n2<-rCharts$new()
 n2 = nPlot( ~experience,group="tool", data = data.boxplot, type = "multiBarChart")
 n2$print('inline',  include_assets=TRUE)
-#p3 <- nPlot(x = 'tool', y = 'box(experience)', data = data.boxplot, type = 'box')
-#p3$print('iframesrc', include_assets = TRUE, cdn = T)
 ```
